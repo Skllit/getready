@@ -1,0 +1,101 @@
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+import java.util.Optional;
+
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+public class TransactionService {
+	
+	List<Transaction> transactions;
+	
+	
+	public List<Transaction> getAllTransactions() {
+		try {
+			Reader reader = new BufferedReader(new FileReader("transactions.csv"));
+			CsvToBean<Transaction>csvToBean=new CsvToBeanBuilder<Transaction>(reader)
+			.withType(Transaction.class)
+			.withIgnoreLeadingWhiteSpace(true)
+			.build();
+			transactions=csvToBean.parse();
+			reader.close();
+		}catch(IOException e){
+			System.err.println(e.getMessage());
+			transactions=null;
+		}
+		return transactions;
+		
+	}
+	
+	public Double getTotalTransactionAmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		if(transactions!=null){
+			return transactions.stream()
+			.mapToDouble(Transaction::getAmount)
+			.sum();
+			
+		}
+		//@todo Write code to assign total transaction amount to amt variable
+		return 0.0;
+		
+	}
+	
+	
+	public Transaction getTransactionWithHighestAmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		if(transactions!=null &&!transactions.isEmpty()){
+			Optional<Transaction>highestTransaction=transactions.stream()
+			.max((t1,t2)->Double.compare(t1.getAmount(), t2.getAmount()));
+			return highestTransaction.orElse(null);
+		}
+		
+		// double tot = 0d;
+		// Transaction highestTransaction = null;
+        //@todo Write code to get the transaction object with highest amount
+         
+            
+	return null;
+	}
+	
+	public Transaction getTransactionWithLowestmount() {
+		if(transactions == null) {
+			getAllTransactions();
+		}
+		if(transactions!=null &&!transactions.isEmpty()){
+			Optional<Transaction>lowestTransaction=transactions.stream()
+			.min((t1,t2)->Double.compare(t1.getAmount(), t2.getAmount()));
+			return lowestTransaction.orElse(null);
+		}
+		// double tot = 0d;
+		// Transaction lowestTransaction = null;
+        //@todo Write code to figure out transaction with lowest amount
+
+		
+            
+	return null;
+	}
+	
+	public Double getAverageTransactionAmount() {
+		if(transactions == null) {
+			transactions = getAllTransactions();
+		}
+		if(transactions!=null &&!transactions.isEmpty()){
+			return transactions.stream()
+			.mapToDouble(Transaction::getAmount)
+			.average()
+			.orElse(0.0);
+		}
+		
+        //@todo Write code to get the average of transaction amounts & return it.
+        return 0.0;
+	}
+
+}
