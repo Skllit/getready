@@ -1,0 +1,119 @@
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class WordAnalyzerService {
+	String fileData;
+	String[] words;
+	Set<String> set = new HashSet<String>();
+	Map<String, Long> map = new HashMap<String, Long>();
+
+	/**
+	 * @return number of words present in the file words.txt
+	 * @throws Exception
+	 */
+	public long readFileAndReturnNoOfWords() {
+		try (BufferedReader reader = new BufferedReader(new FileReader("words.txt"))) {
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line).append(" ");
+			}
+			fileData = sb.toString().trim();
+			words = fileData.split("\\s+"); // Split by any whitespace
+			return words.length;
+		} catch (IOException e) {
+			throw new RuntimeException("Error reading file: " + e.getMessage(), e); //Wrap the exception.
+		}
+	}
+
+	/*
+	 * @return the unique words present in the file. These words should be populated
+	 * in the set variable declared above.
+	 */
+	public long createSetOfUniqueWordsAndReturnUniqueCount() {
+		if (words == null) {
+			readFileAndReturnNoOfWords();
+		}
+		for (String word : words) {
+			set.add(word);
+		}
+		return set.size();
+	}
+
+	/**
+	 * Populate the map variable with key-value mapping of word-count, count
+	 * representing how many times the word appeared in the file.
+	 */
+	public void createMapOfWord_Count() {
+		if (words == null) {
+			readFileAndReturnNoOfWords();
+		}
+		for (String word : words) {
+			map.put(word, map.getOrDefault(word, 0L) + 1);
+		}
+	}
+
+	/**
+	 * @param word - input word
+	 * @return the number of times the input word appeared in the file
+	 */
+	public long getOccurrencesOf(String word) {
+		if (map.isEmpty()) {
+			createMapOfWord_Count();
+		}
+		return map.getOrDefault(word, 0L);
+	}
+
+	/**
+	 * @return topp 3 words sorted (desc) by number of occurrences in the file
+	 */
+	public List<String> findThreeMostCommonWords() {
+		if (map.isEmpty()) {
+			createMapOfWord_Count();
+		}
+		Map<String, Long> sortedMap = sortByValue(map);
+		List<String> topThree = new ArrayList<>();
+		int count = 0;
+		for (String word : sortedMap.keySet()) {
+			topThree.add(word);
+			count++;
+			if (count >= 3) {
+				break;
+			}
+		}
+		return topThree;
+	}
+
+	/**
+	 * Sort the map keys based on key value with most commonly used word at the top.
+	 *
+	 * @param hm
+	 * @return
+	 */
+	private static Map<String, Long> sortByValue(Map<String, Long> hm) {
+		List<Map.Entry<String, Long>> list = new LinkedList<>(hm.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<String, Long>>() {
+			public int compare(Map.Entry<String, Long> o1, Map.Entry<String, Long> o2) {
+				return (o2.getValue()).compareTo(o1.getValue());
+			}
+		});
+		Map<String, Long> sortedMap = new LinkedHashMap<>();
+		for (Map.Entry<String, Long> entry : list) {
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+		return sortedMap;
+	}
+}
