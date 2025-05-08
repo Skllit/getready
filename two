@@ -1,0 +1,69 @@
+package com.tasks.problem;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
+public class ProductService {
+
+	List<Product> products;
+
+	public List<Product> getAllProducts() {
+		try (BufferedReader reader = new BufferedReader(new FileReader("products.csv"))) {
+			CsvToBean<Product> csvToBean = new CsvToBeanBuilder<Product>(reader)
+					.withType(Product.class)
+					.withIgnoreLeadingWhiteSpace(true)
+					.build();
+			products = csvToBean.parse();
+			return products;
+		} catch (Exception e) {
+			throw new RuntimeException("FAILURE_TO_PROCESS_CSV", e);
+		}
+	}
+
+	public List<Product> getProductsWithPriceGreaterThan(Double price) {
+		if (this.products == null) {
+			getAllProducts();
+		}
+		return products.stream()
+				.filter(product -> product.getPrice() > price)
+				.collect(Collectors.toList());
+	}
+
+	public Double groupByCategoryAndAggregateValue(String category) {
+		if (this.products == null) {
+			getAllProducts();
+		}
+		double tot =this.products.stream()
+				.filter(p->p.getCategory()!=null && p.getCategory().equalsIgnoreCase(category))
+				.mapToDouble(p->p.getPrice()!=null?p.getPrice():0.0)
+				.sum();
+		return tot;
+	}
+
+	public Double calculateAverageOfAllProducts() {
+		if (this.products == null) {
+			getAllProducts();
+		}
+		if (products != null && !products.isEmpty()) {
+			return products.stream()
+					.mapToDouble(Product::getPrice)
+					.average()
+					.orElse(0.0);
+		}
+		return 0.0;
+	}
+
+	public Product findProductWithHighestPrice() {
+		if (this.products == null) {
+			getAllProducts();
+		}
+		return products.stream()
+				.max((p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice()))
+				.orElse(null);
+	}
+}
