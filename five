@@ -1,0 +1,95 @@
+package com.tasks.problem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
+public class SerializeDeserializeBinaryTree {
+
+    public static class TreeNode {
+        public int val;
+        public TreeNode left;
+        public TreeNode right;
+
+        public TreeNode(int x) {
+            val = x;
+        }
+    }
+
+    public static String serialize(TreeNode root) {
+        if (root == null) {
+            return "null"; // Changed to "null" for consistency in deserialization
+        }
+        List<String> l = new ArrayList<>();
+        Stack<TreeNode> s = new Stack<>();
+        s.push(root);
+
+        while (!s.isEmpty()) {
+            TreeNode t = s.pop();
+
+            // If current node is NULL, store marker
+            if (t == null) {
+                l.add("null");
+            } else {
+                // Else, store current node
+                // and recur for its children
+                l.add(String.valueOf(t.val));
+                s.push(t.right); // Push right child first
+                s.push(t.left);  // Push left child second (so it's popped first)
+            }
+        }
+        return String.join(",", l); // Use comma as separator
+    }
+
+    static int t;
+
+    // Decodes your encoded data to tree.
+    public static TreeNode deserialize(String data) {
+        if (data == null || data.equals("null")) 
+            return null;
+        t = 0;
+        String[] arr = data.split(",");
+        return helper(arr);
+    }
+
+    public static TreeNode helper(String[] arr) {
+        if (arr[t].equals("null")) {
+            t++;
+            return null;
+        }
+
+        
+        TreeNode root = new TreeNode(Integer.parseInt(arr[t]));
+        t++;
+        root.left = helper(arr); 
+        root.right = helper(arr); 
+        return root;
+    }
+
+    private static void printPreOrderTraversal(TreeNode node) {
+        if (node != null) {
+            System.out.print(node.val + " ");
+            printPreOrderTraversal(node.left);
+            printPreOrderTraversal(node.right);
+        }
+    }
+
+     public static void main(String[] args) {
+        
+        TreeNode root = new TreeNode(1);
+        root.left = new TreeNode(2);
+        root.right = new TreeNode(3);
+        root.left.left = new TreeNode(4);
+        root.left.right = new TreeNode(5);
+        root.right.left = new TreeNode(6);
+        root.right.right = new TreeNode(7);
+
+        String serialized = serialize(root);
+        System.out.println("Serialized: " + serialized); 
+
+        TreeNode deserialized = deserialize(serialized);
+
+        System.out.print("Pre-order Traversal of Deserialized Tree: ");
+        printPreOrderTraversal(deserialized);
+    }
+}
